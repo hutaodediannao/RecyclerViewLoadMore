@@ -101,6 +101,13 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        adapter.setOnItemClickListener(new ModelAdapter.OnItemClickListener<Model>() {
+            @Override
+            public void onItemClick(int position, Model model) {
+                Toast.makeText(MainActivity.this, position + ", " + model.getContent(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void refreshData() {

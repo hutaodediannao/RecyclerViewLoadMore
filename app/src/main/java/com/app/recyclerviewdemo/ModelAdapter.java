@@ -40,7 +40,7 @@ public class ModelAdapter extends BaseRecyclerAdapter<Model> {
     }
 
     @Override
-    protected void bindHolder(BaseViewHolder holder, int position, Model model) {
+    protected void bindHolder(BaseViewHolder holder, final int position, final Model model) {
         int viewType = model.getViewType();
         switch (viewType) {
             case HEADER_TYPE:
@@ -59,5 +59,23 @@ public class ModelAdapter extends BaseRecyclerAdapter<Model> {
             default:
                 break;
         }
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (onItemClickListener != null) {
+                    onItemClickListener.onItemClick(position, model);
+                }
+            }
+        });
+    }
+
+    private OnItemClickListener onItemClickListener;
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
+    }
+
+    public interface OnItemClickListener<T>{
+        void onItemClick(int position, T t);
     }
 }
