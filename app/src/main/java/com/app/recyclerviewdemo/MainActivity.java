@@ -15,6 +15,12 @@ import com.app.recyclerviewdemo.base.BaseRecyclerAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 作者:胡涛
+ * 日期:2021-6-19
+ * 时间:16:45
+ * 功能:RecyclerView 的滑动到底部自动刷新的逻辑以及UI交互
+ */
 public class MainActivity extends AppCompatActivity {
 
     private List<Model> list;
