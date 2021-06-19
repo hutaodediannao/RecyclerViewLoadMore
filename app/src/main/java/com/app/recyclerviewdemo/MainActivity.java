@@ -2,8 +2,10 @@ package com.app.recyclerviewdemo;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,7 +28,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
-    private List<Model> list;
+    private List<Model> list = new ArrayList<>();
     private RecyclerView recyclerView;
     private ModelAdapter adapter;
     private Handler handler;
@@ -39,36 +41,54 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        handler = new Handler();
-        recyclerView = findViewById(R.id.recyclerView);
-        list = new ArrayList<>();
-        adapter = new ModelAdapter(list, this);
+        init();
 
-        LinearLayoutManager manager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
+        setConfig();
+
+        //刷新数据
+        refreshData();
+
+        //滑动监听
+        setListener();
+    }
+
+    private void setConfig() {
+        GridLayoutManager manager = new GridLayoutManager(this, 2, RecyclerView.VERTICAL, false);
+        manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+
+                //重点在这里，这个getSpanSize方法的返回值其实指的是单个item所占用的我们设置的每行的item个数
+                Model model = list.get(position);
+                switch (model.getViewType()) {
+                    case BaseRecyclerAdapter.HEADER_TYPE:
+                        return 2;
+                    case BaseRecyclerAdapter.NORMAL_TYPE:
+                        return 1;
+                    case BaseRecyclerAdapter.FOOTER_TYPE:
+                        return 2;
+                    default:
+                        return 2;
+                }
+            }
+        });
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
+    }
 
-        list.add(new Model("加载中", BaseRecyclerAdapter.HEADER_TYPE));
-        adapter.notifyDataSetChanged();
+    private void init() {
+        handler = new Handler();
+        recyclerView = findViewById(R.id.recyclerView);
+        adapter = new ModelAdapter(list, this);
+    }
 
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                list.clear();
-                for (int i = 0; i < 5; i++) {
-                    list.add(new Model("普通数据: " + i, BaseRecyclerAdapter.NORMAL_TYPE));
-                }
-                adapter.notifyDataSetChanged();
-                currentPageIndex = 1;
-            }
-        }, 2000);
-
+    private void setListener() {
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                    GridLayoutManager manager = (GridLayoutManager) recyclerView.getLayoutManager();
                     int lastPos = manager.findLastVisibleItemPosition();
 
                     if (manager.getChildCount() > 0 && lastPos > manager.getItemCount() - 2
@@ -95,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
                 //一出加载进度条
                 list.remove(list.size() - 1);
 
-                for (int i = 0; i < 5; i++) {
+                for (int i = 0; i < 10; i++) {
                     list.add(new Model("普通数据:" + i, BaseRecyclerAdapter.NORMAL_TYPE));
                 }
                 adapter.notifyDataSetChanged();
@@ -131,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
                 //把那个加载更多的最后一个item移除掉
                 list.remove(list.size() - 1);
 
-                for (int i = 0; i < 5; i++) {
+                for (int i = 0; i < 10; i++) {
                     list.add(new Model("普通数据:" + i, BaseRecyclerAdapter.NORMAL_TYPE));
                 }
                 if (currentPageIndex == maxPageTotal) {
